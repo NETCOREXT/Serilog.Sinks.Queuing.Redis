@@ -1,0 +1,24 @@
+<Project>
+  <PropertyGroup>
+    <Version>1.0.0</Version>
+    <LangVersion>latest</LangVersion>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeProjectReferences</TargetsForTfmSpecificBuildOutput>
+    <Authors>Aren Chen</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/arenchen/Serilog.Sinks.Queuing.Redis</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/arenchen/Serilog.Sinks.Queuing.Redis.git</RepositoryUrl>
+    <Description>Redis sink for Serilog.</Description>
+  </PropertyGroup>
+
+  <Target Name="IncludeProjectReferences" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <IncludeBuildOutput />
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+    </ItemGroup>
+  </Target>
+
+</Project>

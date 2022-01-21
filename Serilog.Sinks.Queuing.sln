@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0C087E5B-EDD4-440B-AD09-2C1AEB634059}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Queuing.Redis", "src\Serilog.Sinks.Queuing.Redis\Serilog.Sinks.Queuing.Redis.csproj", "{EB330C30-D1F3-4D12-955B-05A3FB35D304}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Queuing.Redis.ElasticHook", "src\Serilog.Sinks.Queuing.Redis.ElasticHook\Serilog.Sinks.Queuing.Redis.ElasticHook.csproj", "{2749F087-119C-4B5F-A5A5-327B6A8324E1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EB330C30-D1F3-4D12-955B-05A3FB35D304}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB330C30-D1F3-4D12-955B-05A3FB35D304}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB330C30-D1F3-4D12-955B-05A3FB35D304}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB330C30-D1F3-4D12-955B-05A3FB35D304}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2749F087-119C-4B5F-A5A5-327B6A8324E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2749F087-119C-4B5F-A5A5-327B6A8324E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2749F087-119C-4B5F-A5A5-327B6A8324E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2749F087-119C-4B5F-A5A5-327B6A8324E1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EB330C30-D1F3-4D12-955B-05A3FB35D304} = {0C087E5B-EDD4-440B-AD09-2C1AEB634059}
+		{2749F087-119C-4B5F-A5A5-327B6A8324E1} = {0C087E5B-EDD4-440B-AD09-2C1AEB634059}
+	EndGlobalSection
+EndGlobal
