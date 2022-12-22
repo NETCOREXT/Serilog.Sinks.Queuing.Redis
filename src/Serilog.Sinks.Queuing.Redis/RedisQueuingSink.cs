@@ -1,18 +1,20 @@
 ﻿using System.Text;
+using FreeRedis;
 using Serilog.Core;
 using Serilog.Events;
-using StackExchange.Redis;
+using Serilog.Formatting.Json;
 
 namespace Serilog.Sinks.Queuing.Redis;
 
 public class RedisQueuingSink : ILogEventSink
 {
-    private readonly IDatabase _redis;
+    private readonly RedisClient _redis;
     private readonly RedisQueuingSinkOptions _options;
 
-    public RedisQueuingSink(IDatabase redis, RedisQueuingSinkOptions options)
+    public RedisQueuingSink(RedisQueuingSinkOptions options)
     {
-        _redis = redis;
+        _redis = new RedisClient(options.RedisConnectionString);
+
         _options = options;
     }
 
@@ -22,20 +24,23 @@ public class RedisQueuingSink : ILogEventSink
         {
             using var writer = new StringWriter();
 
-            _options.LogFormatter.Format(logEvent, writer);
+            var formatter = _options.LogFormatter ?? new JsonFormatter();
+            
+            formatter.Format(logEvent, writer);
+            
+            var values = new Dictionary<string, object>
+                         {
+                             { nameof(LogData.Timestamp), logEvent.Timestamp.ToUnixTimeMilliseconds() },
+                             { nameof(LogData.Data), writer.ToString() }
+                         };
 
-            var entries = new NameValueEntry[]
-                          {
-                              new(nameof(LogData.Timestamp), logEvent.Timestamp.ToString("O")),
-                              new(nameof(LogData.Data), writer.ToString())
-                          };
+            var tasks = new List<Task>
+                        {
+                            _redis.XAddAsync(_options.StreamKey, _options.StreamMaxSize ?? RedisQueuingSinkOptions.DEFAULT_STREAM_MAX_SIZE, "*", values),
+                            _redis.PublishAsync(_options.NotificationChannel, "")
+                        };
 
-            var tasks = new List<Task>();
-
-            tasks.Add(_redis.StreamAddAsync(_options.StreamKey, entries, maxLength: _options.StreamMaxSize, useApproximateMaxLength: true));
-            tasks.Add(_redis.PublishAsync(_options.NotficationChannel, ""));
-
-            Task.WaitAll(tasks.ToArray());
+            Task.WhenAll(tasks.ToArray());
         }
         catch (Exception e)
         {

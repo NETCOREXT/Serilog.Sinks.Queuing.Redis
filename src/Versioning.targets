@@ -1,16 +1,22 @@
 <Project>
   <PropertyGroup>
-    <Version>1.0.0</Version>
     <LangVersion>latest</LangVersion>
+    <VersionMajor>1</VersionMajor>
+    <VersionMinor>0</VersionMinor>
+    <VersionPatch>1</VersionPatch>
+    <VersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</VersionPrefix>
+    <VersionSuffix>$(VersionSuffix)</VersionSuffix>
+    <FileVersion>$(VersionMajor).$([System.DateTime]::UtcNow.ToString(yy)).$([System.DateTime]::UtcNow.ToString(MMdd)).$([System.DateTime]::UtcNow.ToString(HHmm))</FileVersion>
+    <IsPackable>true</IsPackable>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeProjectReferences</TargetsForTfmSpecificBuildOutput>
-    <Authors>Aren Chen</Authors>
+    <Authors>NETCOREXT</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/arenchen/Serilog.Sinks.Queuing.Redis</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/arenchen/Serilog.Sinks.Queuing.Redis.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/NETCOREXT/Serilog.Sinks.Queuing.Redis</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/NETCOREXT/Serilog.Sinks.Queuing.Redis.git</RepositoryUrl>
     <Description>Redis sink for Serilog.</Description>
   </PropertyGroup>
 

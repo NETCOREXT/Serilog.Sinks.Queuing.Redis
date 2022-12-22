@@ -1,5 +1,7 @@
+using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
+using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace Serilog.Sinks.Queuing.Redis.ElasticHook;
 
@@ -7,86 +9,81 @@ public class ElasticRedisStreamHook : IRedisStreamHook
 {
     private readonly ElasticHookOptions _options;
     private readonly HttpClient _httpClient;
-
-    public ElasticRedisStreamHook(ElasticHookOptions options)
+    private readonly ILogger<ElasticRedisStreamHook> _logger;
+    
+    public ElasticRedisStreamHook(ElasticHookOptions options, ILogger<ElasticRedisStreamHook> logger)
     {
-        _options = options;
-
-        _httpClient = new HttpClient
+        var handler = new HttpClientHandler
                       {
-                          BaseAddress = new Uri(_options.Connection)
+                          ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
                       };
 
-        CreateTemplateAsync().GetAwaiter()
-                             .GetResult();
+        _httpClient = new HttpClient(handler, true)
+                      {
+                          BaseAddress = new Uri(options.ElasticsearchHost)
+                      };
+
+        if (!string.IsNullOrWhiteSpace(options.ApiKey))
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("ApiKey", options.ApiKey);
+
+        _options = options;
+        _logger = logger;
     }
 
-    public async Task InvokeAsync(IEnumerable<LogData> logs, CancellationToken cancellationToken = default)
+    public async Task<string[]> InvokeAsync(IEnumerable<LogData> logs, CancellationToken cancellationToken = default)
     {
+        var indexPrefix = _options.Index;
+        var indexDateFormat = string.IsNullOrWhiteSpace(_options.IndexFormatPattern) ? string.Empty : DateTimeOffset.UtcNow.ToString(_options.IndexFormatPattern);
+        var index = indexPrefix + indexDateFormat;
+
         var lsTaskResult = new List<HttpResponseMessage>();
         var lsPostData = new StringBuilder();
 
-        foreach (var log in logs)
+        foreach (var req in logs)
         {
-            var indexFormatPattern = log.Timestamp.ToString(_options.IndexFormatPattern);
-            var fullIndex = (_options.Index + indexFormatPattern).ToLower();
-
-            lsPostData.AppendLine("{\"index\":{\"_index\":\"" + fullIndex + "\",\"_id\":\"" + log.Id + "\"}}");
-            lsPostData.AppendLine(log.Data);
+            lsPostData.AppendLine("{\"create\":{ \"_id\": \"" + index + "-" + req.Id + "\" }}");
+            lsPostData.AppendLine(req.Data);
         }
 
         if (lsPostData.Length > 0)
         {
             var postData = lsPostData.ToString();
-            var result = await _httpClient.PostAsync("_bulk", new StringContent(postData, Encoding.UTF8, "application/json"), cancellationToken);
+            var rep = await _httpClient.PostAsync(index + "/_bulk", new StringContent(postData, Encoding.UTF8, "application/json"), cancellationToken);
 
-            lsTaskResult.Add(result);
+            lsTaskResult.Add(rep);
         }
+
+        var result = new List<string>();
 
         foreach (var response in lsTaskResult)
         {
             try
             {
                 response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync(cancellationToken);
+                var streamIds = GetStreamId(index, content);
 
-                var raw = await response.Content.ReadAsByteArrayAsync();
-
-                var rp = JsonSerializer.Deserialize<ResponseResult>(raw);
-
-                if (rp == null) continue;
-
-                foreach (var item in rp.Items)
-                {
-                    if (item.Index.Status == 200 || item.Index.Status == 201) continue;
-
-                    Console.Error.WriteLine("{0} fatal error: {1}", item.Index.Id, item.Index.Error.Reason);
-                }
+                if (streamIds != null && streamIds.Any())
+                    result.AddRange(streamIds);
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine("{0} fatal error: {1}", $"{typeof(ElasticRedisStreamHook)}.{nameof(InvokeAsync)}", e);
+                _logger.LogError(e, "{Message}", e);
             }
         }
+
+        return result.ToArray();
     }
 
-    private async Task CreateTemplateAsync(CancellationToken cancellationToken = default)
+    private string[]? GetStreamId(string index, string content)
     {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(_options.TemplateName) || string.IsNullOrWhiteSpace(_options.TemplatePattern))
-                return;
+        var regex = new Regex("\"_id\":\"([^\"]+)\"", RegexOptions.IgnoreCase);
 
-            var result = await _httpClient.GetAsync("_index_template/" + _options.TemplateName.ToLower(), HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        if (!regex.IsMatch(content)) return null;
 
-            if (result.IsSuccessStatusCode) return;
+        var mc = regex.Matches(content);
 
-            result = await _httpClient.PutAsync("_index_template/" + _options.TemplateName.ToLower(), new StringContent(_options.TemplatePattern, Encoding.UTF8, "application/json"), cancellationToken);
-
-            result.EnsureSuccessStatusCode();
-        }
-        catch (Exception e)
-        {
-            Console.Error.WriteLine("{0} fatal error: {1}", $"{nameof(ElasticRedisStreamHook)}.{nameof(CreateTemplateAsync)}", e);
-        }
+        return mc.Select(t => t.Groups[1].Value.TrimStart((index + "-").ToCharArray()))
+                 .ToArray();
     }
 }
