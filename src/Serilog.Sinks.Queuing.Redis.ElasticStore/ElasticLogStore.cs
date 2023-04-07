@@ -5,13 +5,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Serilog.Sinks.Queuing.Redis.ElasticHook;
 
-public class ElasticRedisStreamHook : IRedisStreamHook
+public class ElasticLogStore : ILogStore
 {
+    private HttpClient _httpClient;
     private readonly ElasticHookOptions _options;
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<ElasticRedisStreamHook> _logger;
-    
-    public ElasticRedisStreamHook(ElasticHookOptions options, ILogger<ElasticRedisStreamHook> logger)
+    private readonly ILogger<ElasticLogStore> _logger;
+
+    public ElasticLogStore(ElasticHookOptions options, ILogger<ElasticLogStore> logger)
     {
         var handler = new HttpClientHandler
                       {
@@ -68,7 +68,7 @@ public class ElasticRedisStreamHook : IRedisStreamHook
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "{Message}", e);
+                _logger.LogError(e, "{Message}", e.Message);
             }
         }
 
@@ -85,5 +85,10 @@ public class ElasticRedisStreamHook : IRedisStreamHook
 
         return mc.Select(t => t.Groups[1].Value.TrimStart((index + "-").ToCharArray()))
                  .ToArray();
+    }
+
+    public void Dispose()
+    {
+        _httpClient.Dispose();
     }
 }

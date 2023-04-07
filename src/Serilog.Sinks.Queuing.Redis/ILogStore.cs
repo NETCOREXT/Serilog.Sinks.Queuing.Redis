@@ -1,6 +1,6 @@
 namespace Serilog.Sinks.Queuing.Redis;
 
-public interface IRedisStreamHook
+public interface ILogStore : IDisposable
 {
     Task<string[]> InvokeAsync(IEnumerable<LogData> logs, CancellationToken cancellationToken = default);
 }

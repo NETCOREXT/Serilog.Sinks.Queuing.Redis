@@ -5,7 +5,7 @@ namespace Serilog.Sinks.Queuing.Redis.ElasticHook.Extensions;
 
 public static class ElasticExtensions
 {
-    public static IServiceCollection AddElasticRedisStreamHook(this IServiceCollection services, Action<IServiceProvider, ElasticHookOptions>? configure)
+    public static IServiceCollection AddElasticLogStore(this IServiceCollection services, Action<IServiceProvider, ElasticHookOptions>? configure)
     {
         services.TryAddSingleton(provider =>
                                  {
@@ -16,7 +16,7 @@ public static class ElasticExtensions
                                      return options;
                                  });
 
-        services.TryAddSingleton<IRedisStreamHook, ElasticRedisStreamHook>();
+        services.TryAddSingleton<ILogStore, ElasticLogStore>();
 
         return services;
     }

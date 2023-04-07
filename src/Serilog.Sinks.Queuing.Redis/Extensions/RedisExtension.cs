@@ -2,14 +2,14 @@ using FreeRedis;
 
 namespace Serilog.Sinks.Queuing.Redis.Extensions;
 
-public static class RedisExtension
+internal static class RedisExtension
 {
-    public static IEnumerable<LogData> ToLogData(this StreamsEntryResult entry)
+    public static IEnumerable<LogData> ToStreamData(this StreamsEntryResult entry)
     {
-        return entry.entries.Select(t => t.ToLogData());
+        return entry.entries.Select(t => t.ToStreamData());
     }
 
-    public static LogData ToLogData(this StreamsEntry entry)
+    public static LogData ToStreamData(this StreamsEntry entry)
     {
         var streamData = new LogData
                          {
@@ -36,5 +36,16 @@ public static class RedisExtension
         }
 
         return streamData;
+    }
+    
+    public static async Task RegisterConsumerAsync(this RedisClient redis, RedisQueuingSinkOptions options)
+    {
+        if (!await redis.ExistsAsync(options.StreamKey) || (await redis.XInfoGroupsAsync(options.StreamKey)).All(x => x.name != options.StreamGroup))
+            await redis.XGroupCreateAsync(options.StreamKey, options.StreamGroup, options.GroupNewestId ? "$" : "0", true);
+
+        var consumers = await redis.XInfoConsumersAsync(options.StreamKey, options.StreamGroup);
+
+        if (consumers.All(x => x.name != options.MachineName))
+            await redis.XGroupCreateConsumerAsync(options.StreamKey, options.StreamGroup, options.MachineName);
     }
 }

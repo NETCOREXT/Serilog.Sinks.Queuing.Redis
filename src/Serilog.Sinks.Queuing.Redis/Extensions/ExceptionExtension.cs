@@ -1,6 +1,6 @@
 namespace Serilog.Sinks.Queuing.Redis.Extensions;
 
-public static class ExceptionExtension
+internal static class ExceptionExtension
 {
     public static Exception GetInnerException(this Exception e)
     {

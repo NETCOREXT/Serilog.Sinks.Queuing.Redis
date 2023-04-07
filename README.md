@@ -10,13 +10,13 @@ Write Serilog events to Redis Stream and store them in Elasticsearch
 ### Step 1
 Add package reference
 ```
-dotnet add package Serilog.Sinks.Queuing.Redis.ElasticHook
+dotnet add package Serilog.Sinks.Queuing.Redis.ElasticStore
 ```
 ### Step 2
 Configure Logging in Program.cs
 ```
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddElasticRedisStreamHook((provider, options) =>
+builder.Services.AddElasticLogStore((provider, options) =>
                                            {
                                                options.ElasticsearchHost = "http://localhost:9200";
                                                options.ApiKey = "foo bar";

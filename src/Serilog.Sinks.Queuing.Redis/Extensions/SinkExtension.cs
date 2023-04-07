@@ -1,11 +1,6 @@
-using FreeRedis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Netcorext.Extensions.Redis.Utilities;
-using Netcorext.Serialization;
 using Serilog.Configuration;
-using Serilog.Core;
-using Serilog.Sinks.Queuing.Redis.Internals;
 
 namespace Serilog.Sinks.Queuing.Redis.Extensions;
 
@@ -18,16 +13,20 @@ public static class SinkExtensions
 
     public static IServiceCollection AddRedisQueuingSink(this IServiceCollection services, Action<IServiceProvider, RedisQueuingSinkOptions>? configure)
     {
+        var config = new RedisQueuingSinkOptions();
+        
         services.TryAddSingleton(provider =>
                                  {
-                                     var config = new RedisQueuingSinkOptions();
-
                                      configure?.Invoke(provider, config);
 
                                      return config;
                                  });
-        
-        services.AddHostedService<RedisQueuingSinkWorker>();
+
+        if (!config.EnableWorker) return services;
+
+        services.AddWorkerRunner<RedisQueuingWorker, PendingStreamRunner>();
+        services.AddWorkerRunner<RedisQueuingWorker, RedisConsumerRunner>();
+        services.AddHostedService<RedisQueuingWorker>();
 
         return services;
     }

@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0C087E5B-EDD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Queuing.Redis", "src\Serilog.Sinks.Queuing.Redis\Serilog.Sinks.Queuing.Redis.csproj", "{EB330C30-D1F3-4D12-955B-05A3FB35D304}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Queuing.Redis.ElasticHook", "src\Serilog.Sinks.Queuing.Redis.ElasticHook\Serilog.Sinks.Queuing.Redis.ElasticHook.csproj", "{2749F087-119C-4B5F-A5A5-327B6A8324E1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.Queuing.Redis.ElasticStore", "src\Serilog.Sinks.Queuing.Redis.ElasticStore\Serilog.Sinks.Queuing.Redis.ElasticStore.csproj", "{2749F087-119C-4B5F-A5A5-327B6A8324E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
