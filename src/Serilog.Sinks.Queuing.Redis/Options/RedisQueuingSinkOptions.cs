@@ -8,10 +8,11 @@ public class RedisQueuingSinkOptions
     public const int DEFAULT_STREAM_IDLE_TIME = 5 * 1000;
     public const int DEFAULT_STREAM_BATCH_SIZE = 100;
     public const long DEFAULT_STREAM_MAX_SIZE = 65535;
-    public const int DEFAULT_HEALTH_CHECK_INTERVAL = 30 * 1000;
+    public const int DEFAULT_WORKER_TASK_LIMIT = 5;
+    public const int DEFAULT_RETRY_LIMIT = 3;
 
     public bool EnableWorker { get; set; }
-    public int? HealthCheckInterval { get; set; } = DEFAULT_HEALTH_CHECK_INTERVAL;
+    
     public ITextFormatter? LogFormatter { get; set; }
     public string MachineName { get; set; } = Environment.GetEnvironmentVariable("HOSTNAME") ?? Environment.MachineName;
     public string NotificationChannel { get; set; } = "serilog";
@@ -22,5 +23,6 @@ public class RedisQueuingSinkOptions
     public int? StreamIdleTime { get; set; } = DEFAULT_STREAM_IDLE_TIME;
     public string StreamKey { get; set; } = "serilog";
     public long? StreamMaxSize { get; set; } = DEFAULT_STREAM_MAX_SIZE;
-    public int? WorkerTaskCount { get; set; } = 5;
+    public int? WorkerTaskLimit { get; set; } = DEFAULT_WORKER_TASK_LIMIT;
+    public int? RetryLimit { get; set; } = DEFAULT_RETRY_LIMIT;
 }

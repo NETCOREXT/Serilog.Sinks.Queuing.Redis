@@ -38,7 +38,7 @@ public class RedisQueuingSink : ILogEventSink
                         _options.StreamMaxSize.HasValue
                             ? _redis.XAddAsync(_options.StreamKey, _options.StreamMaxSize.Value, "*", values)
                             : _redis.XAddAsync(_options.StreamKey, values),
-                        _redis.PublishAsync(_options.NotificationChannel, "")
+                        _redis.PublishAsync(_options.NotificationChannel, _options.StreamKey)
                     };
 
         Task.WhenAll(tasks.ToArray());

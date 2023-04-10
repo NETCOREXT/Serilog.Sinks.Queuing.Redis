@@ -22,10 +22,8 @@ public static class SinkExtensions
                                      return config;
                                  });
 
-        if (!config.EnableWorker) return services;
-
-        services.AddWorkerRunner<RedisQueuingWorker, PendingStreamRunner>();
         services.AddWorkerRunner<RedisQueuingWorker, RedisConsumerRunner>();
+        services.AddWorkerRunner<RedisQueuingWorker, PendingStreamRunner>();
         services.AddHostedService<RedisQueuingWorker>();
 
         return services;

@@ -29,6 +29,8 @@ public class PendingStreamRunner : IWorkerRunner<RedisQueuingWorker>
 
             _isDetecting = true;
 
+            await _redis.RegisterConsumerAsync(_options);
+
             try
             {
                 await ClaimPendingStreamAsync(_options.StreamKey, cancellationToken);

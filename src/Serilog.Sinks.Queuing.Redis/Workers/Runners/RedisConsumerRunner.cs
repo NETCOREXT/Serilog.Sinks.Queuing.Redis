@@ -15,8 +15,8 @@ internal class RedisConsumerRunner : IWorkerRunner<RedisQueuingWorker>
 
     public RedisConsumerRunner(IEnumerable<ILogStore> stores, RedisQueuingSinkOptions options)
     {
-        _locker = options.WorkerTaskCount.HasValue
-                      ? new KeyCountLocker(maximum: options.WorkerTaskCount.Value)
+        _locker = options.WorkerTaskLimit.HasValue
+                      ? new KeyCountLocker(maximum: options.WorkerTaskLimit.Value)
                       : new KeyCountLocker();
 
         _redis = new RedisClient(options.RedisConnectionString);
@@ -26,7 +26,7 @@ internal class RedisConsumerRunner : IWorkerRunner<RedisQueuingWorker>
 
     public async Task InvokeAsync(RedisQueuingWorker worker, CancellationToken cancellationToken = default)
     {
-        if (_stores.Any())
+        if (!_stores.Any())
             return;
 
         await _redis.RegisterConsumerAsync(_options);
